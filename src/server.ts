@@ -1,17 +1,23 @@
-import app from "./app";
 import dotenv from "dotenv";
+import app from "./app";
+import config from "./config";
+
 
 dotenv.config();
 const PORT=process.env.PORT 
-async function main(){
-    try{
-    app.listen(PORT,()=>{
+
+if(config.NODE_ENV==="production"){
+  app.listen(PORT,()=>{
         console.log(`Server is running on port ${PORT}`)
     })
-    }
-    catch(err){
-
-console.log("Error starting the server",err)
-    }
 }
-main();
+// async function main(){
+//     try{
+  
+//     }
+//     catch(err){
+
+// console.log("Error starting the server",err)
+//     }
+// }
+// main();
