@@ -1,5 +1,13 @@
 model Equipments{
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
   name String
-  model String
+  brand String
+  category String
+  location String
+  dailyRate Float
+  createdAt DateTime @default(now())
+  providerId String
+  provider User @relation(fields:[providerId],references:[id])
+bookings Booking[]
+
 }
