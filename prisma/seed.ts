@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs"
 import prisma from "../src/lib/prisma"
-import { PaymentStatus, Role } from "./generated/prisma/enums"
+import { BookingStatus, PaymentStatus, Role } from "./generated/prisma/enums"
+import { randomUUID } from "node:crypto"
 
 async function main(){
     console.log("running")
@@ -145,14 +146,86 @@ for(const equipmentData of equipmentCreate)
   equipments.push(equipment)
 }
 console.log(`Created ${equipments.length} equipments`)
+console.log("customer1",customer1);
+console.log("customer2",customer2);
+const users = await prisma.user.findMany();
+console.log("users",users);
+const bookingsToCreate = [
+  {
+    equipment: equipments[0],
+    customer: customer1.id,
+    startDate: new Date("2026-08-11"),
+    endDate: new Date("2026-08-11"),
+    paymentStatus: PaymentStatus.COMPLETED,
+    bookingStatus: BookingStatus.CONFIRMED,
+  },
+  {
+    equipment: equipments[1],
+    customer: customer2.id,
+    startDate: new Date("2026-08-12"),
+    endDate: new Date("2026-08-14"),
+    paymentStatus: PaymentStatus.PENDING,
+    bookingStatus: BookingStatus.PENDING,
+  },
+  {
+    equipment: equipments[2],
+    customer: customer2.id,
+    startDate: new Date("2026-08-15"),
+    endDate: new Date("2026-08-18"),
+    paymentStatus: PaymentStatus.COMPLETED,
+    bookingStatus: BookingStatus.CONFIRMED,
+  },
+  {
+    equipment: equipments[3],
+    customer: customer1.id,
+    startDate: new Date("2026-08-20"),
+    endDate: new Date("2026-08-22"),
+    paymentStatus: PaymentStatus.FAILED,
+    bookingStatus: BookingStatus.CANCELED,
+  },
+  {
+    equipment: equipments[4],
+    customer: customer2.id,
+    startDate: new Date("2026-08-25"),
+    endDate: new Date("2026-08-27"),
+    paymentStatus: PaymentStatus.COMPLETED,
+    bookingStatus: BookingStatus.CONFIRMED,
+  },
+];
+for (const b of bookingsToCreate){
+  if(b.equipment){
+ const totalPrice=10*b.equipment?.dailyRate;
 
-const bookingsToCreate=[{
-    equipment:equipments[0],
-    customer:customer1.id,
-    startDate:new Date("2026-08-11"),
-    endDate:new Date("2026-08-11"),
-    paymentStatus:PaymentStatus.COMPLETED
-}]
+  const booking=await prisma.booking.create({
+    data:{
+      equipmentsId:b.equipment?.id,
+      customerId:b.customer,
+      startDate:b.startDate,
+      endDate:b.endDate,
+      totalPrice,
+status:b.bookingStatus
 
+    }
+  
+  })
+  if(b.paymentStatus!==PaymentStatus.PENDING){
+    await prisma.payment.create({
+    data:{
+      bookingId:booking.id,
+      amount:totalPrice,
+      status:b.paymentStatus,
+      transectionId:randomUUID()
+
+    }
+  
+  })
+  }
+
+  }
+
+ 
 }
-main().then(process.exit(0))
+
+console.log(`Created ${bookingsToCreate.length}bookings`)
+}
+main().then(()=>{process.exit(0)})
