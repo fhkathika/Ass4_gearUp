@@ -9,9 +9,10 @@ import userRouter from "./modules/users/user.route";
 
 const app:Application=express()
 app.get("/",async(req:Request,res:Response)=>{
-   const equipment=await prisma.equipments.findMany()
-   console.log(equipment)
-   res.json(equipment)
+    res.send("Server is running");
+   // const equipment=await prisma.equipments.findMany()
+   // console.log(equipment)
+   // res.json(equipment)
   
 })
 app.use("/auth",authRouter)
