@@ -1,86 +1,30 @@
-import express, { Application, NextFunction, Request, RequestHandler, Response } from "express";
-import httpStatus from "http-status";
+import type { Request, Response } from "express";
 
-import { userService } from "./user.service";
-import { catchAsync } from "../../utils/catchAsync";
-import { sendResponse } from "../../utils/sendResponse";
-import jwt from "jsonwebtoken"
-import config from "../../config";
-import { jwtUtills } from "../../utils/jwt";
-// const registerUser=async(req:Request,res:Response)=>{
+import prisma from "../../lib/prisma";
+import { catchAsync } from "../../utils/catch-async";
+import { sendResponse } from "../../utils/send-response";
+import { getCurrentUser } from "./user.service";
 
-// try{
-//     const payload=req.body;
-// const user=await userService.registerUserIntoDb(payload)
-// res.status(httpStatus.CREATED).json({
-//     success:true,
-//     statusCode:httpStatus.CREATED,
-//     message:"User regitered successfully",
-//     data:{
-//         user
-//     }
+export const getMe = catchAsync(async (req: Request, res: Response) => {
+  if (!req.user) {
+    return sendResponse(res, { message: "User not authenticated" }, 401);
+  }
 
-// })
-// }
-// catch(error){
-// res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
-//     success:false,
-//     statusCode:httpStatus.INTERNAL_SERVER_ERROR,
-//     message:"Failed to register",
-//     error:(error as Error).message
-// })
-// }
+  const user = await getCurrentUser(req.user.id);
 
+  if (!user) {
+    return sendResponse(res, { message: "User not found" }, 404);
+  }
 
+  return sendResponse(res, {
+    data: { user },
+    message: "User retrieved successfully",
+  });
+});
 
-
-//     }
-
-const registerUser=catchAsync(async (req:Request,res:Response,next:NextFunction) =>{
-    const payload=req.body;
-const user=await userService.registerUserIntoDb(payload)
-
-sendResponse(res,{
-    success:true,
-    statusCode:httpStatus.CREATED,
-        message:"User regitered successfully",
-    data:{
-        user
-    }
-})
-})
-const getMyProfile=catchAsync(async (req:Request,res:Response,next:NextFunction)=>{
-const {accessToken}=req.cookies;
-console.log(req.user,"user request")
-// const verifiedToken=jwtUtills.verifyToken(accessToken,config.jwt_access_secret)
-// if(typeof verifiedToken==="string"){
-//     throw new Error(verifiedToken)
-// }
- const profile=await userService.getMyProfileFromDB(req.user?.id as string)
-sendResponse(res,{
-success:true,
-statusCode:httpStatus.OK,
-message:"User Profile fetched successfully",
-data:{profile}
-
-,})
-})
-
-const updateMyProfile=catchAsync(async (req:Request,res:Response,next:NextFunction)=>{
-const userId=req.user?.id as string;
-
-const payload=req.body;
-const updatedProfile=await userService.updateMyProfileIntoDB(userId,payload)
-sendResponse(res,{
-    success:true,
-    statusCode:httpStatus.OK,
-    message:"user profile updated successfully",
-    data:{updatedProfile}
-})
-})
-
-    export const  userController={
-        registerUser,
-        getMyProfile,
-        updateMyProfile
-    }
+export const getUsers = catchAsync(async (_req: Request, res: Response) => {
+  const users = await prisma.user.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+  return res.status(200).json({ users });
+});

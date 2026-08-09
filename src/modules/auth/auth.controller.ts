@@ -1,52 +1,32 @@
-import { NextFunction, Request,Response } from "express";
-import { catchAsync } from "../../utils/catchAsync";
-import { authService } from "./auth.service";
-import { sendResponse } from "../../utils/sendResponse";
-import  httpStatus  from "http-status";
-const loginUser=catchAsync(async (req:Request,res:Response,next:NextFunction)=>{
-const payload=req.body
-const {accessToken,refreshToken}=await authService.loginUser(payload)
-res.cookie("accessToken",accessToken,{
-    httpOnly:true,
-    secure:false,
-    sameSite:"none",
-    maxAge:100*60*60*24 //24hr or 1day
-})
-res.cookie("refreshToken",refreshToken,{
-    httpOnly:true,
-    secure:false,
-    sameSite:"none",
-    maxAge:100*60*60*24*7 // 7day
-})
-sendResponse(res,{
-    success:true,
-    statusCode:httpStatus.OK,
-    message:"User logged in successfully",
-    data:{accessToken,refreshToken}
-})
-})
- const refreshToken=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
-const refreshToken=req.cookies.refreshToken
-const {accessToken}=await authService.refreshToken(refreshToken)
-res.cookie("accessToken",accessToken,{
-    httpOnly:true,
-    secure:false,
-    sameSite:"none",
-    maxAge:100*60*60*24 //24hr or 1day
-})
-sendResponse(res,{
-    success:true,
-    statusCode:httpStatus.OK,
-    message:"Token refresh successfully",
-    data:{
-        accessToken
-    }
-})
- })
+import type { Request, Response } from "express";
+import { loginSchema, registerSchema } from "./auth.validation";
+import { loginUser, registerUser } from "./auth.service";
+import { sendResponse } from "../../utils/send-response";
+import { catchAsync } from "../../utils/catch-async";
 
+export const register = catchAsync(async (req: Request, res: Response) => {
+  const input = registerSchema.parse(req.body);
 
-export const authController={
-    loginUser,
-    refreshToken
-   
-}
+  const result = await registerUser(input);
+
+  sendResponse(
+    res,
+    { message: "User registered successfully", data: { user: result } },
+    201,
+  );
+});
+
+export const login = catchAsync(async (req: Request, res: Response) => {
+  const input = loginSchema.parse(req.body);
+
+  const result = await loginUser(input);
+
+  sendResponse(res, {
+    message: "Login successful",
+    data: {
+      user: result.user,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+    },
+  });
+});
