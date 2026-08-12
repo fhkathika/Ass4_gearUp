@@ -2,13 +2,14 @@ import { ErrorRequestHandler } from "express";
 import { ZodError } from "zod";
 import { AppError } from "../utils/app-error";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
-import { PrismaClientValidationError } from "../../generated/prisma/internal/prismaNamespace";
 import config from "../config";
+import { PrismaClientValidationError } from "../../prisma/generated/prisma/internal/prismaNamespace";
 
-export const globalErrorHandle:ErrorRequestHandler=(err,req,res)=>{
+export const globalErrorHandle:ErrorRequestHandler=(err,req,res,next)=>{
     let statusCode=500
     let message ="something went wrong"
     let errorDetails:unknown=null
+    console.log("actual error",err)
     if(err instanceof ZodError){
         statusCode=400;
         message:"validation error"

@@ -15,6 +15,7 @@ app.get("/",async(req:Request,res:Response)=>{
    // res.json(equipment)
   
 })
+app.use(express.json())
 app.use("/auth",authRouter)
 app.use("/users",userRouter)
 app.use("/equipments",equipmentsRouter)

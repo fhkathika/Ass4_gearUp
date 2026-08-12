@@ -41,5 +41,5 @@ export const addEquipment=catchAsync(async(req:Request,res:Response)=>{
         providerId:req.user!.id
        } 
     })
-    sendResponse(res,{message:"Car Created Successfully"})
+    sendResponse(res,{message:"Car Created Successfully",data:{equipment}})
 })

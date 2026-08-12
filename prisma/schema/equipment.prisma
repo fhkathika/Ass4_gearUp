@@ -3,7 +3,7 @@ model Equipments{
   name String
   brand String
   category String
-  isAvailable Boolean
+  isAvailable Boolean @default(true)
   location String
   dailyRate Float
   createdAt DateTime @default(now())
