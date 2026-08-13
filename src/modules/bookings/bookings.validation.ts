@@ -5,3 +5,5 @@ export const createBookingSchema=z.object({
 startDate:z.coerce.date(),
 endDate:z.coerce.date(),
 }).refine((input)=>input.endDate> input.startDate,"endDate must be after start date")
+
+export type createBookingInput=z.infer<typeof createBookingSchema>
