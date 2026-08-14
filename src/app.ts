@@ -10,6 +10,7 @@ import { bookingRouter } from "./modules/bookings/bookings.route";
 import paymentRouter from "./modules/payment/payment.route";
 
 const app:Application=express()
+app.post("/payment/webhook",express.raw({type:"application/json"}))
 app.use(express.json())
 app.get("/",async(req:Request,res:Response)=>{
     res.send("Server is running");
