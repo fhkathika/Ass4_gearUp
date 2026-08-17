@@ -4,17 +4,17 @@ PENDING
 CANCELED
 }
 
-model Booking{
-  id String @id @default(uuid())
- equipmentsId String
-equipment Equipments @relation(fields:[equipmentsId],references:[id])
-customerId String
-customer User @relation(fields:[customerId],references:[id])
-startDate DateTime
-endDate DateTime
-totalPrice Float
-status BookingStatus @default(PENDING)
-createdAt DateTime @default(now())
-// payment
-payment Payment[]
+model Booking {
+  id           String        @id @default(uuid())
+  equipmentsId String
+  equipment    Equipments    @relation(fields: [equipmentsId], references: [id])
+  customerId   String
+  customer     User          @relation(fields: [customerId], references: [id])
+  startDate    DateTime
+  endDate      DateTime
+  totalPrice   Float
+  status       BookingStatus @default(PENDING)
+  createdAt    DateTime      @default(now())
+
+  payment      Payment?
 }
