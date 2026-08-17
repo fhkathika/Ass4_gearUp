@@ -1,4 +1,5 @@
 import prisma from "../../lib/prisma"
+import { stripe } from "../../lib/stripe"
 import { AppError } from "../../utils/app-error"
 
 export const createCheckoutSession=async(customerId:string,bookingId:string)=>{
@@ -24,4 +25,38 @@ export const createCheckoutSession=async(customerId:string,bookingId:string)=>{
  if(booking.payment?.status){
     throw new AppError(404,"Booking is already paid")
  }
+ const session=await stripe.checkout.sessions.create({
+   mode:"payment",
+   metadata:{bookingId:booking.id},
+   success_url:"http://localhost:5000/payment/success",
+ cancel_url:"http://localhost:5000/payment/cancel",
+ line_items:[{
+   quantity:1,
+   price_data:{
+      currency:"USD",
+      unit_amount:Math.round(booking.totalPrice),
+      product_data:{
+         name:`${booking.equipment.brand}`
+      }
+   }
+ }]
+
+ })
+
+ await prisma.payment.upsert({
+   where:{
+      bookingId:booking.id,
+
+   },
+   create:{
+      bookingId:booking.id,
+      amount:booking.totalPrice,
+      transactionId:session.id
+   },
+   update:{
+      transactionId:session.id,
+      status:"PENDING"
+   }
+ })
+ return {checkOutUrl:session.url}
 }

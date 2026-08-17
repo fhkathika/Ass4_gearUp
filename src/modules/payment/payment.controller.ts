@@ -5,6 +5,8 @@ import { AppError } from "../../utils/app-error";
 import { stripe } from "../../lib/stripe";
 import config from "../../config";
 import z from "zod";
+import { createCheckoutSession } from "./payment.services";
+import { sendResponse } from "../../utils/send-response";
 export const webhook=catchAsync(async(req:Request,res:Response)=>{
 const signature=req.header("stripe-signature")
 if(!signature){
@@ -23,14 +25,22 @@ catch(err){
 throw new AppError(400,"Invalid webhook signature")
 
 }
-const session=event.data.object
-// const bookingId=session.metadata
+const session=event.data.object as {id:string,metadata?:{bookingId:string}}
+const bookingId=session.metadata?.bookingId
+
+if(bookingId){
+    if(event.type=="checout.session.completed")
+}
 })
 const bookingIdShema=z.object({
-id:z.uuid()
+bookingId:z.uuid()
 })
 export const checkout=catchAsync(async(req:Request,res:Response)=>{
-const {id}=bookingIdShema.parse(req.body)
+const {bookingId}=bookingIdShema.parse(req.body)
+const result=await createCheckoutSession(req.user!.id,bookingId)
+
+
+sendResponse(res,{message:"Checkout session created",data:result})
 
 })
 
