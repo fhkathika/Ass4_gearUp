@@ -5,8 +5,9 @@ import { AppError } from "../../utils/app-error";
 import { stripe } from "../../lib/stripe";
 import config from "../../config";
 import z from "zod";
-import { createCheckoutSession } from "./payment.services";
+import { completePayment, createCheckoutSession } from "./payment.services";
 import { sendResponse } from "../../utils/send-response";
+import prisma from "../../lib/prisma";
 export const webhook=catchAsync(async(req:Request,res:Response)=>{
 const signature=req.header("stripe-signature")
 if(!signature){
@@ -29,7 +30,17 @@ const session=event.data.object as {id:string,metadata?:{bookingId:string}}
 const bookingId=session.metadata?.bookingId
 
 if(bookingId){
-    if(event.type=="checout.session.completed")
+    if(event.type=="checkout.session.completed"){
+await completePayment(bookingId,session.id)
+    }
+    else if(event.type=="checkout.session.expired" || event.type=="checkout.session.async_payment_failed" ){
+await prisma.payment.updateMany({
+    where:{bookingId,status:"PENDING"},
+data:{status:"FAILED"}
+})
+    }
+    res.json({received:true})
+
 }
 })
 const bookingIdShema=z.object({

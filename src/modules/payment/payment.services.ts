@@ -60,3 +60,27 @@ export const createCheckoutSession=async(customerId:string,bookingId:string)=>{
  })
  return {checkOutUrl:session.url}
 }
+
+export const  completePayment=async(bookingId:string,transectionId:string)=>{
+const payment=await prisma.payment.findUnique({where:{bookingId}})
+if(!payment || payment.status=="COMPLETED")return
+await prisma.$transaction([
+
+   
+  prisma.payment.update({
+      where:{bookingId},
+      data:{status:"COMPLETED",transectionId}
+  }),
+
+  prisma.booking.update({
+   where:{
+         id:bookingId
+      },
+      data:{
+         status:"CONFIRMED"
+      }
+  })
+  
+  
+])
+}
