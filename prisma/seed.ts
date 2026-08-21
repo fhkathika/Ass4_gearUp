@@ -224,7 +224,7 @@ status:b.bookingStatus
       bookingId:booking.id,
       amount:totalPrice,
       status:b.paymentStatus,
-      transectionId:randomUUID()
+      transactionId:randomUUID()
 
     }
   

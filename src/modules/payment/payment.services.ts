@@ -28,8 +28,8 @@ export const createCheckoutSession=async(customerId:string,bookingId:string)=>{
  const session=await stripe.checkout.sessions.create({
    mode:"payment",
    metadata:{bookingId:booking.id},
-   success_url:"http://localhost:5000/payment/success",
- cancel_url:"http://localhost:5000/payment/cancel",
+   success_url:"https://ass4-gear-up.vercel.app/payment/success",
+ cancel_url:"phttps://ass4-gear-up.vercel.app/ayment/cancel",
  line_items:[{
    quantity:1,
    price_data:{
