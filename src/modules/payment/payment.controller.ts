@@ -54,6 +54,18 @@ const result=await createCheckoutSession(req.user!.id,bookingId)
 sendResponse(res,{message:"Checkout session created",data:result})
 
 })
+export const getMyPayments = catchAsync(async (req: Request, res: Response) => {
+  const payments = await prisma.payment.findMany({
+    where: { booking: { customerId: req.user!.id } },
+    include: { booking: { include: { equipment: true } } },
+    // orderBy: { createdAt: "desc" },
+  });
+
+  sendResponse(res, {
+    message: "Payments retrieved successfully",
+    data: { payments },
+  });
+});
 
 
 
