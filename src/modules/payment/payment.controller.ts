@@ -44,10 +44,10 @@ data:{status:"FAILED"}
 }
 })
 const bookingIdShema=z.object({
-bookingId:z.uuid()
+bookingId:z.uuid("invalid booking id")
 })
 export const checkout=catchAsync(async(req:Request,res:Response)=>{
-const {bookingId}=bookingIdShema.parse(req.body)
+const {bookingId}=bookingIdShema.parse(req.params)
 const result=await createCheckoutSession(req.user!.id,bookingId)
 
 

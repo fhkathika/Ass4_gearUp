@@ -29,7 +29,7 @@ export const createCheckoutSession=async(customerId:string,bookingId:string)=>{
    mode:"payment",
    metadata:{bookingId:booking.id},
    success_url:"https://ass4-gear-up.vercel.app/payment/success",
- cancel_url:"phttps://ass4-gear-up.vercel.app/ayment/cancel",
+ cancel_url:"https://ass4-gear-up.vercel.app/payment/cancel",
  line_items:[{
    quantity:1,
    price_data:{
