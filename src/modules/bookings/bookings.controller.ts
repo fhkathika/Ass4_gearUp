@@ -1,7 +1,7 @@
 import { catchAsync } from "../../utils/catch-async";
 import type { Request,Response } from "express";
 import { createBookingSchema } from "./bookings.validation";
-import { createBooking } from "./bookings.service";
+import { createBooking, getCurrentUserBooking } from "./bookings.service";
 import { sendResponse } from "../../utils/send-response";
 import z from "zod";
 import prisma from "../../lib/prisma";
@@ -23,7 +23,7 @@ const equipment=await prisma.booking.findMany({
         createdAt:"desc"
     }
 })
-sendResponse(res,{message:"Equipments retrived successfully",data:{equipment}})
+sendResponse(res,{message:"Bookings retrived successfully",data:{equipment}})
 
 })
 
@@ -31,11 +31,19 @@ const bookingIdSchema=z.object({
     id:z.uuid()
 
 })
-// export const getMyBooking=catchAsync(async(req:Request,res:Response)=>{
-//    const {id}=bookingIdSchema.parse(req.params);
+export const getMyBooking = catchAsync(async (req: Request, res: Response) => {
+  if (!req.user) {
+    return sendResponse(res, { message: "User not authenticated" }, 401);
+  }
 
-//    console.log(id)
-//    const equipment= await getEquipmentById(id)
-//    sendResponse(res,{message:"Car retrived Successfully",data:{equipment}})
-//    return{} 
-// })
+  const bookings = await getCurrentUserBooking(req.user.id);
+
+//   if (!user) {
+//     return sendResponse(res, { message: "User not found" }, 404);
+//   }
+
+  return sendResponse(res, {
+    data: { bookings },
+    message: "User bookings retrieved successfully",
+  });
+});

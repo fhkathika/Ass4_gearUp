@@ -45,3 +45,17 @@ return prisma.booking.create({
     }
 })
 }
+
+
+export async function getCurrentUserBooking(userId: string) {
+  return prisma.booking.findMany({
+    where: { id: userId },
+   include:{
+    equipments:true,
+    payment:true,
+   },
+   orderBy:{
+    createdAt:"desc"
+   },
+  });
+}
