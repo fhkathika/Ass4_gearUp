@@ -8,3 +8,14 @@ export const createEquipmentSchema=z.object({
     location:z.string().min(1,"location is required"),
      dailyRate:z.number(),
 })
+
+export const updateequipmentSchema = createEquipmentSchema.partial().extend({
+  isAvailable: z.boolean().optional(),
+});
+
+export const equipmentIdParamSchema = z.object({
+  id: z.uuid("invalid car id"),
+});
+
+export type CreateEquipmentInput = z.infer<typeof createEquipmentSchema>;
+export type UpdateEquipmentCarInput = z.infer<typeof updateequipmentSchema>;

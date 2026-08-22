@@ -59,3 +59,14 @@ export async function getCurrentUserBooking(userId: string) {
    },
   });
 }
+
+export async function getProviderBookings(providerId: string) {
+  return prisma.booking.findMany({
+    where: { equipment: { providerId } },
+    include: { equipment: true },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function cancelBooking(bookingId: string, renterId: string) {
+}

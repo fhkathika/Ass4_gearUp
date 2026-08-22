@@ -1,7 +1,7 @@
 import { catchAsync } from "../../utils/catch-async";
 import type { Request,Response } from "express";
 import { createBookingSchema } from "./bookings.validation";
-import { createBooking, getCurrentUserBooking } from "./bookings.service";
+import { cancelBooking, createBooking, getCurrentUserBooking } from "./bookings.service";
 import { sendResponse } from "../../utils/send-response";
 import z from "zod";
 import prisma from "../../lib/prisma";
@@ -47,3 +47,32 @@ export const getMyBooking = catchAsync(async (req: Request, res: Response) => {
     message: "User bookings retrieved successfully",
   });
 });
+
+export const getProviderBookings = catchAsync(
+  async (req: Request, res: Response) => {
+    const bookings = await prisma.booking.findMany({
+      where: { equipment: { providerId: req.user!.id } },
+      include: { equipment: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    sendResponse(res, {
+      message: "Bookings retrieved successfully",
+      data: { bookings },
+    });
+  },
+);
+
+export const cancelBookingById = catchAsync(
+  async (req: Request, res: Response) => {
+    const booking = await cancelBooking(
+      req.params.id as string,
+      req.user!.id,
+    );
+
+    sendResponse(res, {
+      message: "Booking cancelled successfully",
+      data: { booking },
+    });
+  },
+);

@@ -30,3 +30,4 @@ export function verifyAccessToken(token: string) {
 export function verifyRefreshToken(token: string) {
   return jwt.verify(token, config.JWT_REFRESH_SECRET) as UserJwtPayload;
 }
+
