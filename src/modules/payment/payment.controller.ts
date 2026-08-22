@@ -47,7 +47,7 @@ const bookingIdShema=z.object({
 bookingId:z.uuid()
 })
 export const checkout=catchAsync(async(req:Request,res:Response)=>{
-const {bookingId}=bookingIdShema.parse(req.params)
+const {bookingId}=bookingIdShema.parse(req.body)
 const result=await createCheckoutSession(req.user!.id,bookingId)
 
 
